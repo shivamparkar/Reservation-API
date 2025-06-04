@@ -1,47 +1,46 @@
 import express from "express";
-import Hotel from "../models/Hotel.js";
-import { createError } from "../utils/error.js";
-
 import {
-    countByCity,
-    countByType,
-    createHotel,
-    deleteHotel,
-    getHotel,
-    getHotelRooms,
-    getHotels,
-    updateHotel,
-  } from "../controllers/hotelController.js";
+  countByCity,
+  countByType,
+  createHotel,
+  deleteHotel,
+  getHotel,
+  getHotelRooms,
+  getHotels,
+  updateHotel,
+  createManyHotels,
+} from "../controllers/hotelController.js";
 
-import {verifyAdmin} from "../utils/verifyToken.js";
+import { verifyAdmin } from "../utils/verifyToken.js";
 
 const router = express.Router();
 
-//Create
+
 router.post("/", verifyAdmin, createHotel);
 
 
-//Get
-router.get("/",verifyAdmin, getHotels);
+router.post("/all", createManyHotels);
 
 
-//Get By Id
-router.get("/:id", verifyAdmin,getHotel);
-
-//Update
-router.put("/:id",verifyAdmin, updateHotel);
+router.get("/countByCity", countByCity);
+router.get("/countByType", countByType);
 
 
-//Delete
-router.delete("/:id",deleteHotel)
+router.get("/room/:id", getHotelRooms);
+
+
+router.get("/", getHotels);
+
+
+router.get("/:id", verifyAdmin, getHotel);
+
+
+router.put("/:id", verifyAdmin, updateHotel);
+
+
+router.delete("/find/:id", verifyAdmin, deleteHotel);
 
 
 router.get("/find/:id", getHotel);
-
-//Get All
-router.get("/", getHotels);
-router.get("/countByCity", countByCity);
-router.get("/countByType", countByType);
-router.get("/room/:id", getHotelRooms);
 
 export default router;

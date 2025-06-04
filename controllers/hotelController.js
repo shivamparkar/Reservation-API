@@ -6,11 +6,26 @@ export const createHotel = async (req, res, next) => {
 
   try {
     const savedHotel = await newHotel.save();
+    console.log("Hotel Created", savedHotel);
+
     res.status(200).json(savedHotel);
   } catch (err) {
     next(err);
   }
 };
+
+export const createManyHotels = async (req, res, next) => {
+  try {
+    const savedHotels = await Hotel.insertMany(req.body);
+    console.log("Multiple hotels created:", savedHotels);
+    res.status(200).json(savedHotels);
+  } catch (err) {
+    console.log(err);
+
+    next(err);
+  }
+};
+
 export const updateHotel = async (req, res, next) => {
   try {
     const updatedHotel = await Hotel.findByIdAndUpdate(
@@ -40,18 +55,32 @@ export const getHotel = async (req, res, next) => {
     next(err);
   }
 };
+
 export const getHotels = async (req, res, next) => {
-  const { min, max, ...others } = req.query;
+  const { min = 1, max = 10000, limit = 10, featured, ...others } = req.query;
+
+  const minPrice = parseInt(min);
+  const maxPrice = parseInt(max);
+
+  const filter = {
+    ...others,
+    cheapestPrice: { $gt: minPrice, $lt: maxPrice },
+  };
+
+  if (featured !== undefined) {
+    filter.featured = featured === "true";
+  }
+
   try {
-    const hotels = await Hotel.find({
-      ...others,
-      cheapestPrice: { $gt: min | 1, $lt: max || 999 },
-    }).limit(req.query.limit);
-    res.status(200).json(hotels);
+    const hotels = await Hotel.find(filter).limit(parseInt(limit));
+    hotels.length === 0
+      ? res.status(404).json({ message: "No hotels found" })
+      : res.status(200).json(hotels);
   } catch (err) {
     next(err);
   }
 };
+
 export const countByCity = async (req, res, next) => {
   const cities = req.query.cities.split(",");
   try {
@@ -65,6 +94,7 @@ export const countByCity = async (req, res, next) => {
     next(err);
   }
 };
+
 export const countByType = async (req, res, next) => {
   try {
     const hotelCount = await Hotel.countDocuments({ type: "hotel" });
@@ -93,7 +123,7 @@ export const getHotelRooms = async (req, res, next) => {
         return Room.findById(room);
       })
     );
-    res.status(200).json(list)
+    res.status(200).json(list);
   } catch (err) {
     next(err);
   }
