@@ -36,6 +36,11 @@ app.use("/api/hotels", hotelsRoute);
 app.use("/api/rooms", roomsRoute);
 app.use("/api/flightRoutes", flightRoute)
 
+
+app.get("/", (req, res) => {
+  res.send("Reservation API is running on Railway!");
+});
+
 app.use((err, req, res, next) =>{
   const errorStatus = err.status || 500
   const errorMessage = err.message || "Something went wrong"  
